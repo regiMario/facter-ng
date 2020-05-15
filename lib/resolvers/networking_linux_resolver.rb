@@ -90,7 +90,7 @@ module Facter
         def fill_ip_v4_info!(ip_tokens, network_info)
           return unless ip_tokens[2].casecmp('inet').zero?
 
-          interface_name, ip4_address, ip4_mask_length = retrieve_name_and_ip_info(ip_tokens)
+          interface_name, ip4_address, ip4_mask_length = retrieve_name_and_ip_info(ip_tokens, '32')
 
           binding = build_binding(ip4_address, ip4_mask_length)
           build_network_info_structure!(network_info, interface_name, 'bindings')
@@ -105,11 +105,15 @@ module Facter
           network_info[interface_name][:netmask] ||= binding[:netmask]
         end
 
-        def retrieve_name_and_ip_info(tokens)
+        def retrieve_name_and_ip_info(tokens, default_mask)
           interface_name = tokens[1]
           ip_info = tokens[3].split('/')
           ip_address = ip_info[0]
-          ip_mask_length = ip_info[1]
+          if ip_info.length > 1
+            ip_mask_length = ip_info[1]
+          else
+            ip_mask_length = default_mask
+          end
 
           [interface_name, ip_address, ip_mask_length]
         end
@@ -117,7 +121,7 @@ module Facter
         def fill_io_v6_info!(ip_tokens, network_info)
           return unless ip_tokens[2].casecmp('inet6').zero?
 
-          interface_name, ip6_address, ip6_mask_length = retrieve_name_and_ip_info(ip_tokens)
+          interface_name, ip6_address, ip6_mask_length = retrieve_name_and_ip_info(ip_tokens, '128')
 
           binding = build_binding(ip6_address, ip6_mask_length)
 
